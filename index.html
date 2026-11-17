@@ -954,17 +954,6 @@
       background: linear-gradient(90deg, rgba(255, 154, 162, 0.5), rgba(255, 182, 193, 0.95));
     }
 
-    .gap-pill {
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: rgba(226, 232, 240, 0.88);
-      background: rgba(255, 255, 255, 0.09);
-      padding: 1px 7px;
-      border-radius: 10px;
-      white-space: nowrap;
-      font-variant-numeric: tabular-nums;
-    }
-
     .rank-delta-pill {
       font-size: 0.68rem;
       font-weight: 800;
@@ -4206,9 +4195,9 @@
       return Number.isFinite(num) ? Math.trunc(num) : null;
     }
 
-    // Dot number formatter (e.g. 17.840)
-    function formatDotNumber(num) {
-      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    // Comma thousands number formatter (e.g. 17,840)
+    function formatCommaNumber(num) {
+      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
 
     function prefersReducedMotion() {
@@ -4219,7 +4208,7 @@
     function animateCountUp(el, fromVal, toVal) {
       if (!el) return;
       if (prefersReducedMotion() || typeof requestAnimationFrame !== 'function' || fromVal === toVal) {
-        el.textContent = formatDotNumber(toVal);
+        el.textContent = formatCommaNumber(toVal);
         return;
       }
       const duration = 620;
@@ -4229,11 +4218,11 @@
         const t = Math.min(1, elapsed / duration);
         const eased = 1 - Math.pow(1 - t, 3);
         const current = Math.round(fromVal + (toVal - fromVal) * eased);
-        el.textContent = formatDotNumber(current);
+        el.textContent = formatCommaNumber(current);
         if (t < 1) {
           requestAnimationFrame(step);
         } else {
-          el.textContent = formatDotNumber(toVal);
+          el.textContent = formatCommaNumber(toVal);
         }
       }
       requestAnimationFrame(step);
@@ -4404,10 +4393,8 @@
         const safeThName = escapeHtml(conf.thName || t.code);
         const accentColor = conf.accent || '#00F0FF';
         const startScore = (prevTeamScores[t.code] !== undefined) ? prevTeamScores[t.code] : 0;
-        const dotScore = formatDotNumber(startScore);
+        const formattedScore = formatCommaNumber(startScore);
         const ratio = (hasScores && leaderScore > 0) ? Math.max(0.08, Math.min(1, t.totalScore / leaderScore)) : 0;
-        const gap = (hasScores && leaderScore > 0 && t.rank > 1) ? (leaderScore - t.totalScore) : 0;
-        const gapHtml = gap > 0 ? '<span class="gap-pill">-' + formatDotNumber(gap) + ' แต้ม</span>' : '';
 
         let deltaHtml = '';
         if (hasScores && prevTeamRanks[t.code] !== undefined && prevTeamRanks[t.code] !== t.rank) {
@@ -4448,10 +4435,9 @@
                 '</div>' +
                 '<div class="podium-name-th">' + safeThName + '</div>' +
               '</div>' +
-              '<div class="podium-score">' + dotScore + '</div>' +
+              '<div class="podium-score">' + formattedScore + '</div>' +
               '<div class="podium-meta-row">' +
                 '<span class="games-pill">' + t.gamesPlayed + '/96 เกม</span>' +
-                gapHtml +
               '</div>' +
             '</div>' +
             '<div class="podium-plinth">' +
@@ -4489,10 +4475,9 @@
               '</div>' +
             '</div>' +
             '<div class="card-score-side">' +
-              '<div class="team-score-val">' + dotScore + '</div>' +
+              '<div class="team-score-val">' + formattedScore + '</div>' +
               '<div class="score-sub-meta">' +
                 '<span class="games-pill">' + t.gamesPlayed + '/96</span>' +
-                gapHtml +
               '</div>' +
             '</div>' +
             '<div class="score-ratio-track"><div class="score-ratio-fill" style="transform: scaleX(' + ratio.toFixed(4) + ');"></div></div>';
@@ -4569,7 +4554,7 @@
             html +=
               '<div style="background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">' +
                 '<div style="font-size: 0.85rem; font-weight: 700;">อันดับ ' + (i + 1) + ': <b>' + escapeHtml(w.name) + '</b> (' + escapeHtml(w.company) + ')</div>' +
-                '<div style="font-size: 0.78rem; color: #FFD700; font-weight: 700;">คะแนนรวม 6 เกม: ' + w.totalScore.toLocaleString() + '</div>' +
+                '<div style="font-size: 0.78rem; color: #FFD700; font-weight: 700;">คะแนนรวม 6 เกม: ' + formatCommaNumber(w.totalScore) + '</div>' +
               '</div>';
           } else {
             html +=
@@ -4655,7 +4640,7 @@
             '</div>' +
           '</div>' +
           '<div class="team-summary-stats">' +
-            '<div>คะแนนรวม: <b style="color: var(--cyan-glow);">' + formatDotNumber(team.totalScore) + '</b></div>' +
+            '<div>คะแนนรวม: <b style="color: var(--cyan-glow);">' + formatCommaNumber(team.totalScore) + '</b></div>' +
             '<div>เกมที่เล่น: <b>' + team.gamesPlayed + '/96</b></div>' +
             '<div>เฉลี่ย/เกม: <b>' + avgPerGame + '</b></div>' +
           '</div>' +
@@ -4714,7 +4699,7 @@
           '<td>' + escapeHtml(p.name) + '</td>' +
           '<td>' + escapeHtml(p.category) + '</td>' +
           gameCells +
-          '<td style="text-align: right; font-weight: 800; color: var(--cyan-glow);">' + p.totalScore.toLocaleString() + '</td>' +
+          '<td style="text-align: right; font-weight: 800; color: var(--cyan-glow);">' + formatCommaNumber(p.totalScore) + '</td>' +
           '<td style="text-align: right; font-weight: 700; color: #FFA500;">' + p.highGame + '</td>' +
           '<td style="text-align: center;">' + p.gamesCount + '/6</td>' +
           '<td>' + statusBadge + '</td>';
